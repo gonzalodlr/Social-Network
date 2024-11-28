@@ -15,6 +15,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import VideoPlayer from "react-native-video-controls";
 
 const verifiedIcon = require("@/assets/images/verificado.png");
 
@@ -23,7 +24,7 @@ type PostProps = {
   content: string;
   topic: string;
   author: string;
-  image?: any;
+  media?: any;
 };
 
 const colors = [
@@ -54,7 +55,7 @@ const getRandomColor = () => {
 let devideHeight = Dimensions.get("window").height;
 let devideWidth = Dimensions.get("window").width;
 
-const Post = ({ title, content, topic, author, image }: PostProps) => {
+const Post = ({ title, content, topic, author, media }: PostProps) => {
   const [modalVisible, setModalVisible] = useState(false);
   const authorColor = getRandomColor();
 
@@ -62,9 +63,11 @@ const Post = ({ title, content, topic, author, image }: PostProps) => {
     console.log(`Author ${author} clicked`);
   };
 
+  console.log("Media object:", media);
+  console.log("MIME type:", media?.mimeType);
+  console.log("URI:", media?.uri);
+
   const handleImagePress = () => {
-    console.log(devideHeight);
-    console.log(devideWidth);
     setModalVisible(true);
   };
 
@@ -109,44 +112,88 @@ const Post = ({ title, content, topic, author, image }: PostProps) => {
           </Text>
         </View>
       </View>
+
       <ThemedText style={[styles.blackText, styles.content]}>
         {content}
       </ThemedText>
-      {image && (
+
+      {media && (
         <>
-          <TouchableOpacity
-            onPress={handleImagePress}
-            accessibilityLabel="Ampliar imagen"
-            accessible={true}
-          >
-            <Image source={image} style={styles.image} />
-          </TouchableOpacity>
-          <Modal
-            visible={modalVisible}
-            transparent={true}
-            style={styles.modalContainer}
-            accessible={true}
-            accessibilityLabel="Imagen ampliada"
-          >
-            <View style={styles.modalContainer}>
+          {(media.mimeType?.startsWith("image/") ||
+            media.uri?.startsWith("data:image") ||
+            media.uri?.startsWith("/assets/")) && (
+            <>
               <TouchableOpacity
-                onPress={handleCloseModal}
+                onPress={handleImagePress}
+                accessibilityLabel="Ampliar imagen"
                 accessible={true}
-                accessibilityLabel="Cerrar imagen ampliada"
               >
-                <ImageBackground
-                  source={image}
+                <Image
+                  source={{ uri: media.uri }}
                   resizeMode="contain"
-                  style={{
-                    height: devideHeight * 0.9,
-                    width: devideWidth * 0.9,
-                    alignSelf: "center",
-                    marginTop: devideHeight * 0.05,
-                  }}
+                  style={styles.image}
                 />
               </TouchableOpacity>
-            </View>
-          </Modal>
+              <Modal
+                visible={modalVisible}
+                transparent={true}
+                style={styles.modalContainer}
+                accessible={true}
+                accessibilityLabel="Imagen ampliada"
+              >
+                <View style={styles.modalContainer}>
+                  <TouchableOpacity
+                    onPress={handleCloseModal}
+                    accessible={true}
+                    accessibilityLabel="Cerrar imagen ampliada"
+                  >
+                    <ImageBackground
+                      source={
+                        media.uri.startsWith("data:image")
+                          ? { uri: (media as { uri: string }).uri }
+                          : media.uri
+                      }
+                      resizeMode="contain"
+                      style={{
+                        height: devideHeight * 0.9,
+                        width: devideWidth * 0.9,
+                        alignSelf: "center",
+                        marginTop: devideHeight * 0.05,
+                      }}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </Modal>
+            </>
+          )}
+
+          {(media.mimeType?.startsWith("application/") ||
+            media.uri?.startsWith("data:application/pdf")) && (
+            <TouchableOpacity
+              onPress={() => console.log("Document clicked")}
+              style={styles.documentContainer}
+            >
+              <Text style={styles.documentText}>View Document</Text>
+            </TouchableOpacity>
+          )}
+
+          {media.mimeType?.startsWith("video/") && (
+            <VideoPlayer
+              source={{ uri: media.uri }}
+              style={styles.video}
+              onBack={() => null}
+              onEnd={() => null}
+            />
+          )}
+
+          {/\.(mp3|wav|ogg)$/i.test(media.uri) && (
+            <TouchableOpacity
+              onPress={() => console.log("Audio clicked")}
+              style={styles.documentContainer}
+            >
+              <Text style={styles.documentText}>Play Audio</Text>
+            </TouchableOpacity>
+          )}
         </>
       )}
 
@@ -216,7 +263,8 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: 200,
-    aspectRatio: 16 / 9,
+    aspectRatio: 1 / 1,
+    position: "relative",
     borderRadius: 8,
     marginTop: 8,
   },
@@ -259,6 +307,20 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     marginLeft: 12,
+  },
+  video: {
+    width: "100%",
+    height: 200,
+    marginTop: 8,
+  },
+  documentContainer: {
+    backgroundColor: "#fff", // dark grey
+    padding: 8,
+    borderRadius: 4,
+    marginTop: 8,
+  },
+  documentText: {
+    color: "#000",
   },
 });
 

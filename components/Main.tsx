@@ -15,11 +15,26 @@ import Post from "@/components/Post";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
 
-const warzone = require("@/assets/images/warzone.jpg");
-const futbol = require("@/assets/images/futbol.jpg");
-const nttdata = require("@/assets/images/nttdata.jpg");
-const triatlon = require("@/assets/images/triatlon.jpg");
+import warzone from "@/assets/images/warzone.jpg";
+import futbol from "@/assets/images/futbol.jpg";
+import nttdata from "@/assets/images/nttdata.jpg";
+import triatlon from "@/assets/images/triatlon.jpg";
+
+interface Post {
+  id: string;
+  title: string;
+  topic: string;
+  author: string;
+  content: string;
+  media: {
+    uri: string;
+    name: string;
+    mimeType: string;
+  };
+}
+
 const logo = require("@/assets/images/posttopiaLogo.png");
 
 const posts = [
@@ -30,7 +45,7 @@ const posts = [
       "Me encanta jugar Call of Duty: Warzone. La emoción de planificar estrategias con mi equipo y ejecutar la emboscada perfecta es inigualable. Las nuevas actualizaciones del mapa han hecho el juego aún más emocionante. Recientemente, descubrí una nueva táctica para dominar en el modo Battle Royale: se trata de utilizar el terreno a nuestro favor, escondiéndonos en lugares estratégicos y atacando en el momento justo. Además, la comunicación constante con el equipo es clave para coordinar movimientos y asegurar la victoria.",
     topic: "Videojuegos",
     author: "jU4n1t0",
-    image: warzone, // Add the image property
+    media: warzone, // Add the media property
   },
   {
     id: "2",
@@ -39,17 +54,17 @@ const posts = [
       "No hay nada como la atmósfera de un partido de fútbol en vivo. La energía de la multitud, la habilidad de los jugadores y la imprevisibilidad del juego hacen que cada partido sea una experiencia inolvidable. Recuerdo la última vez que fui al estadio a ver a mi equipo favorito; el ambiente era electrizante. Los cánticos, las banderas ondeando y la emoción de cada gol nos mantenían a todos al borde de nuestros asientos. Además, poder compartir ese momento con amigos y familiares lo hace aún más especial.",
     topic: "Deportes",
     author: "SoccerFan34",
-    image: futbol, // Add the image property
+    media: futbol, // Add the media property
   },
   {
     id: "3",
     title:
       "Se acabaron las especulaciones en IA generativa: de experimentos a inversiones reales.",
     content:
-      "NTT DATA, ha publicado su informe “Perspectivas para 2025: cómo las organizaciones están forjando su destino con IA generativa“ que revela que ya no hay lugar para especulaciones en lo relativo a esta tecnología. Sus resultados muestran de manera abrumadora que los líderes ejecutivos están pasando de la experimentación a casos de uso a largo plazo que transforman el rendimiento e impactan de lleno en áreas como la cultura corporativa, el compliance, la seguridad y la sostenibilidad. /n ",
+      "NTT DATA, ha publicado su informe “Perspectivas para 2025: cómo las organizaciones están forjando su destino con IA generativa“ que revela que ya no hay lugar para especulaciones en lo relativo a esta tecnología. Sus resultados muestran de manera abrumadora que los líderes ejecutivos están pasando de la experimentación a casos de uso a largo plazo que transforman el rendimiento e impactan de lleno en áreas como la cultura corporativa, el compliance, la seguridad y la sostenibilidad.",
     topic: "Anuncio",
     author: "NTTDataES",
-    image: nttdata,
+    media: nttdata,
   },
   {
     id: "4",
@@ -66,7 +81,7 @@ const posts = [
       "🌟 Entrenamiento de Triatlón: ¡Superando mis límites cada día! 🌟\n\nHoy quiero hablarles de algo que me apasiona profundamente: el triatlón. Es un deporte que va más allá de nadar, pedalear y correr. Es una verdadera prueba de resistencia, disciplina y fortaleza mental. 💪🏊‍♂️🚴‍♂️🏃‍♂️\n\nDesde que me inicié en este mundo, he aprendido muchísimo sobre cómo mi cuerpo y mente pueden superar barreras que jamás imaginé. Y lo mejor es que el triatlón no es solo un desafío físico, sino también un estilo de vida que me ha enseñado a ser más organizado, paciente y constante. ⏱️\n\n🏊‍♂️ La natación es mi primer reto: sumergirse en el agua, controlar la respiración y encontrar un ritmo es clave para comenzar bien el día.\n\n🚴‍♂️ El ciclismo es pura adrenalina: esos kilómetros me enseñan a mantener la calma, el enfoque y a aprovechar al máximo mi energía.\n\n🏃‍♂️ La carrera es el momento de dar todo lo que tengo, de sentir que ya casi termino y que lo que sigue es solo seguir avanzando, sin rendirme.\n\nCada día me esfuerzo más para mejorar mi tiempo, mi técnica y mi resistencia. Y aunque a veces las jornadas de entrenamiento son duras, la recompensa llega cuando logras cruzar esa meta y miras hacia atrás con orgullo. 🏅\n\n✨ Si tú también amas el deporte o estás pensando en iniciarte en el triatlón, te animo a que no te rindas, ¡porque todo es posible con constancia! ✨\n\n",
     topic: "Deportes",
     author: "Moreno",
-    image: triatlon,
+    media: triatlon,
   },
 ];
 
@@ -99,7 +114,7 @@ export default function Main() {
     topic: "",
     author: "",
     content: "",
-    media: null as string | null,
+    media: { uri: "", name: "", mimeType: "" },
   });
 
   const handlePost = () => {
@@ -109,33 +124,51 @@ export default function Main() {
       topic: newPost.topic,
       author: newPost.author,
       content: newPost.content,
-      image: newPost.media,
+      media: {
+        uri: newPost.media.uri,
+        name: newPost.media.name,
+        mimeType: newPost.media.mimeType,
+      },
     };
-
     posts.unshift(newPostWithId); // Add the new post to the beginning of the posts array
-
     setModalVisible(false);
     setNewPost({
       title: "",
       topic: "",
       author: "",
       content: "",
-      media: null,
+      media: { uri: "", name: "", mimeType: "" },
     }); // Reset the new post state
   };
 
   const handleAddMedia = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    /* let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
+    }); */
+
+    let result = await DocumentPicker.getDocumentAsync({
+      type: "*/*",
+      copyToCacheDirectory: true,
     });
 
     if (!result.canceled) {
-      if (result.assets && result.assets.length > 0) {
-        setNewPost({ ...newPost, media: result.assets[0].uri });
-      }
+      setNewPost({
+        ...newPost,
+        media: {
+          uri: result.assets[0].uri,
+          name: result.assets[0].name,
+          mimeType: result.assets[0].mimeType || "",
+        },
+      });
+
+      /* newPost.media = {
+        uri: result.assets[0].uri,
+        name: result.assets[0].name,
+        mimeType: result.assets[0].mimeType || "",
+      }; */
     }
   };
 
@@ -195,7 +228,11 @@ export default function Main() {
             content={item.content}
             topic={item.topic}
             author={item.author}
-            image={item.image}
+            media={{
+              uri: item.media?.uri,
+              name: item.media?.name,
+              mimeType: item.media?.mimeType,
+            }}
           />
         )}
         keyExtractor={(item) => item.id}
@@ -233,7 +270,7 @@ export default function Main() {
           />
           {newPost.media && (
             <Image
-              source={{ uri: newPost.media }}
+              source={{ uri: newPost.media?.uri }}
               style={styles.previewImage}
             />
           )}
