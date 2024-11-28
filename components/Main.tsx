@@ -16,11 +16,13 @@ import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
+import { Video } from "react-native-video";
 
 import warzone from "@/assets/images/warzone.jpg";
 import futbol from "@/assets/images/futbol.jpg";
 import nttdata from "@/assets/images/nttdata.jpg";
 import triatlon from "@/assets/images/triatlon.jpg";
+const pdfIcon = require("@/assets/images/pdfIcon.png");
 
 interface Post {
   id: string;
@@ -268,12 +270,36 @@ export default function Main() {
             placeholder="Tema"
             onChangeText={(text) => handleInputChange("topic", text)}
           />
-          {newPost.media && (
+          {newPost.media && newPost.media.mimeType?.startsWith("image/") && (
             <Image
-              source={{ uri: newPost.media?.uri }}
+              source={{ uri: newPost.media.uri }}
               style={styles.previewImage}
             />
           )}
+
+          {newPost.media &&
+            newPost.media.mimeType?.startsWith("application/") && (
+              <Image source={pdfIcon} style={styles.pdf} />
+            )}
+
+          {newPost.media && newPost.media.mimeType?.startsWith("video/") && (
+            <View
+              style={{
+                width: 260,
+                height: 260,
+                alignItems: "center",
+                marginVertical: 10,
+              }}
+            >
+              <Video
+                source={{ uri: newPost.media.uri }}
+                style={styles.video}
+                resizeMode="contain"
+                controls
+              />
+            </View>
+          )}
+
           <TouchableOpacity style={styles.mediaButton} onPress={handleAddMedia}>
             <Text style={styles.mediaButtonText}>Añadir Media</Text>
           </TouchableOpacity>
@@ -418,5 +444,18 @@ const styles = StyleSheet.create({
   anuncioText: {
     color: "#000",
     fontWeight: "bold",
+  },
+  pdf: {
+    width: 100,
+    height: 100,
+    marginBottom: 10,
+    alignContent: "center",
+  },
+  video: {
+    position: "relative",
+    width: "80%",
+    height: 200,
+    marginTop: 8,
+    borderRadius: 8,
   },
 });

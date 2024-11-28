@@ -15,9 +15,10 @@ import Icon from "react-native-vector-icons/FontAwesome";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import VideoPlayer from "react-native-video-controls";
+import Video from "react-native-video";
 
 const verifiedIcon = require("@/assets/images/verificado.png");
+const pdfIcon = require("@/assets/images/pdfIcon.png");
 
 type PostProps = {
   title: string;
@@ -63,10 +64,14 @@ const Post = ({ title, content, topic, author, media }: PostProps) => {
     console.log(`Author ${author} clicked`);
   };
 
-  console.log("Media object:", media);
-  console.log("MIME type:", media?.mimeType);
-  console.log("URI:", media?.uri);
-
+  if (
+    media.mimeType?.startsWith("application/") ||
+    media.uri?.startsWith("data:video/")
+  ) {
+    console.log("Media object:", media);
+    console.log("MIME type:", media?.mimeType);
+    console.log("URI:", media?.uri);
+  }
   const handleImagePress = () => {
     setModalVisible(true);
   };
@@ -170,20 +175,28 @@ const Post = ({ title, content, topic, author, media }: PostProps) => {
           {(media.mimeType?.startsWith("application/") ||
             media.uri?.startsWith("data:application/pdf")) && (
             <TouchableOpacity
-              onPress={() => console.log("Document clicked")}
+              onPress={() => {
+                const pdfWindow = window.open("");
+                pdfWindow?.document.write(
+                  `<h1>${media.name}</h1><iframe width='100%' height='100%' src='${media.uri}'></iframe>`
+                );
+              }}
               style={styles.documentContainer}
             >
               <Text style={styles.documentText}>View Document</Text>
+              <Image source={pdfIcon} style={styles.verifiedIcon} />
             </TouchableOpacity>
           )}
 
           {media.mimeType?.startsWith("video/") && (
-            <VideoPlayer
-              source={{ uri: media.uri }}
-              style={styles.video}
-              onBack={() => null}
-              onEnd={() => null}
-            />
+            <View style={styles.vistaMedia}>
+              <Video
+                source={{ uri: media.uri }}
+                style={styles.video}
+                resizeMode="contain"
+                controls
+              />
+            </View>
           )}
 
           {/\.(mp3|wav|ogg)$/i.test(media.uri) && (
@@ -304,23 +317,34 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   verifiedIcon: {
-    width: 16,
-    height: 16,
-    marginLeft: 12,
+    width: 100,
+    height: 100,
+    marginTop: 6,
   },
   video: {
-    width: "100%",
+    position: "relative",
+    width: "80%",
     height: 200,
     marginTop: 8,
+    borderRadius: 8,
   },
   documentContainer: {
     backgroundColor: "#fff", // dark grey
     padding: 8,
     borderRadius: 4,
     marginTop: 8,
+    marginBottom: 6,
+    alignItems: "center",
   },
   documentText: {
-    color: "#000",
+    color: "blue",
+  },
+  vistaMedia: {
+    marginLeft: "25%",
+    marginRight: "25%",
+    height: 260,
+    alignItems: "center",
+    marginVertical: 10,
   },
 });
 
