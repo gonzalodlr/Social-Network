@@ -16,6 +16,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import Video from "react-native-video";
+import CommentsModal from "./Comment";
 
 const verifiedIcon = require("@/assets/images/verificado.png");
 const pdfIcon = require("@/assets/images/pdfIcon.png");
@@ -58,6 +59,7 @@ let devideWidth = Dimensions.get("window").width;
 
 const Post = ({ title, content, topic, author, media }: PostProps) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [commentsVisible, setCommentsVisible] = useState(false);
   const authorColor = getRandomColor();
 
   const handleAuthorPress = () => {
@@ -78,6 +80,14 @@ const Post = ({ title, content, topic, author, media }: PostProps) => {
 
   const handleCloseModal = () => {
     setModalVisible(false);
+  };
+
+  const openComments = () => {
+    console.log("Comments button clicked");
+    <CommentsModal
+      modalVisible={modalVisible}
+      setModalVisible={setModalVisible}
+    />;
   };
 
   return (
@@ -184,7 +194,7 @@ const Post = ({ title, content, topic, author, media }: PostProps) => {
               style={styles.documentContainer}
             >
               <Text style={styles.documentText}>View Document</Text>
-              <Image source={pdfIcon} style={styles.verifiedIcon} />
+              <Image source={pdfIcon} style={styles.pdf} />
             </TouchableOpacity>
           )}
 
@@ -211,8 +221,12 @@ const Post = ({ title, content, topic, author, media }: PostProps) => {
       )}
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.postButton}>
+        <TouchableOpacity style={styles.postButton} onPress={openComments}>
           <Icon name="comment" size={20} color="#000" />
+          <CommentsModal
+            modalVisible={commentsVisible}
+            setModalVisible={setCommentsVisible}
+          />
         </TouchableOpacity>
         <TouchableOpacity style={styles.postButton}>
           <Icon name="heart" size={20} color="#000" />
@@ -317,8 +331,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   verifiedIcon: {
-    width: 100,
-    height: 100,
+    width: 26,
+    height: 26,
     marginTop: 6,
   },
   video: {
@@ -345,6 +359,10 @@ const styles = StyleSheet.create({
     height: 260,
     alignItems: "center",
     marginVertical: 10,
+  },
+  pdf: {
+    width: 100,
+    height: 100,
   },
 });
 
