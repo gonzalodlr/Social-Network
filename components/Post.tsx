@@ -29,6 +29,12 @@ type PostProps = {
   media?: any;
 };
 
+type Comment = {
+  id: string;
+  user: string;
+  content: string;
+};
+
 const colors = [
   "#4B0082", // Indigo
   "#2F4F4F", // DarkSlateGray
@@ -60,6 +66,8 @@ let devideWidth = Dimensions.get("window").width;
 const Post = ({ title, content, topic, author, media }: PostProps) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [commentsVisible, setCommentsVisible] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]); // Comentarios por post
+  const [newComment, setNewComment] = useState<string>("");
   const authorColor = getRandomColor();
 
   const handleAuthorPress = () => {
@@ -83,11 +91,24 @@ const Post = ({ title, content, topic, author, media }: PostProps) => {
   };
 
   const openComments = () => {
+    setCommentsVisible(true);
     console.log("Comments button clicked");
     <CommentsModal
       modalVisible={modalVisible}
       setModalVisible={setModalVisible}
     />;
+  };
+  
+  const handleAddComment = () => {
+    if (newComment.trim().length > 0) {
+      const newCommentObject: Comment = {
+        id: (comments.length + 1).toString(),
+        user: "UsuarioActual", // Simula el usuario actual
+        content: newComment,
+      };
+      setComments([...comments, newCommentObject]);
+      setNewComment("");
+    }
   };
 
   return (
