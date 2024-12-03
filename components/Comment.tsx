@@ -9,25 +9,52 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Image,
 } from "react-native";
+import axios from "axios";
 
 interface Comment {
   id: string;
   user: string;
-  content: string;
+  content?: string;
+  gifUrl?: string;
 }
 
 const commentsData: Comment[] = [
   { id: "1", user: "jU4n1t0", content: "¡Qué gran post! 🔥" },
   { id: "2", user: "SoccerFan34", content: "Completamente de acuerdo 👌" },
-  { id: "3", user: "NTTDataES", content: "Información muy interesante." },
+  { id: "3", user: "Willyrex", content: "Información muy interesante." },
 ];
 
-const CommentsModal = ({ modalVisible, setModalVisible }: any) => {
+const API_KEY = "";
+const GIPHY_API_URL = "https://api.giphy.com/v1/gifs/search";
+
+type CommentsModalProps = {
+  modalVisible: boolean;
+  setModalVisible: (visible: boolean) => void;
+  initialComments: Comment[]; // Prop para los comentarios iniciales
+};
+
+const defaultSuggestions = [
+  "¡Muy interesante!",
+  "¡Me gusta!",
+  "👌🏻👌🏻👌🏻",
+  "🔥🔥🔥",
+  "❤️❤️❤️",
+];
+
+const CommentsModal = ({
+  modalVisible,
+  setModalVisible,
+  initialComments,
+}: CommentsModalProps) => {
   const [comments, setComments] = useState<Comment[]>(commentsData);
   const [newComment, setNewComment] = useState<string>("");
+  const [gifModalVisible, setGifModalVisible] = useState(false);
+  const [searchResults, setSearchResults] = useState<string[]>([]); // URLs de los GIFs encontrados
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const handleAddComment = () => {
+  const handleAddComment = (content: string) => {
     if (newComment.trim().length > 0) {
       const newCommentObject: Comment = {
         id: (comments.length + 1).toString(),
@@ -36,6 +63,39 @@ const CommentsModal = ({ modalVisible, setModalVisible }: any) => {
       };
       setComments([...comments, newCommentObject]);
       setNewComment("");
+    }
+  };
+
+  const handleGifPublish = (gifUrl: string) => {
+    const newCommentObject: Comment = {
+      id: (comments.length + 1).toString(),
+      user: "UsuarioActual",
+      gifUrl, // Establecer URL del GIF
+    };
+    setComments([...comments, newCommentObject]); // Actualizar la lista de comentarios
+    setGifModalVisible(false); // Cerrar el modal de GIFs
+  };
+  
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setNewComment(suggestion); // Pone la sugerencia en la caja de texto
+  };
+
+  const fetchGifs = async () => {
+    try {
+      const response = await axios.get(GIPHY_API_URL, {
+        params: {
+          api_key: API_KEY,
+          q: searchTerm,
+          limit: 10,
+        },
+      });
+      const gifs = response.data.data.map(
+        (gif: any) => gif.images.fixed_height.url
+      );
+      setSearchResults(gifs);
+    } catch (error) {
+      console.error("Error fetching GIFs:", error);
     }
   };
 
@@ -59,16 +119,39 @@ const CommentsModal = ({ modalVisible, setModalVisible }: any) => {
 
         {/* Comments List */}
         <FlatList
-          data={comments}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.commentContainer}>
-              <Text style={styles.commentUser}>{item.user}</Text>
-              <Text style={styles.commentContent}>{item.content}</Text>
-            </View>
-          )}
-          style={styles.commentsList}
+  data={comments}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => (
+    <View style={styles.commentContainer}>
+      <Text style={styles.commentUser}>{item.user}</Text>
+      {/* Renderizar contenido del comentario si existe */}
+      {item.content && <Text style={styles.commentContent}>{item.content}</Text>}
+      {/* Renderizar GIF si existe */}
+      {item.gifUrl && (
+        <Image
+          source={{ uri: item.gifUrl }}
+          style={styles.gif} // Ajusta el tamaño y estilo del GIF
         />
+      )}
+    </View>
+  )}
+  style={styles.commentsList}
+/>
+        {/* Comment Suggestions */}
+        <View style={styles.suggestionsContainer}>
+          <Text style={styles.suggestionsTitle}>Sugerencias:</Text>
+          <View style={styles.suggestionsList}>
+            {defaultSuggestions.map((suggestion, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.suggestionButton}
+                onPress={() => handleSuggestionClick(suggestion)}
+              >
+                <Text style={styles.suggestionText}>{suggestion}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
 
         {/* Input Section */}
         <View style={styles.inputContainer}>
@@ -80,11 +163,54 @@ const CommentsModal = ({ modalVisible, setModalVisible }: any) => {
           />
           <TouchableOpacity
             style={styles.publishButton}
-            onPress={handleAddComment}
+            onPress={() => handleAddComment(newComment)}
           >
             <Text style={styles.publishButtonText}>Publicar</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.gifButton}
+            onPress={() => setGifModalVisible(true)} // Muestra el modal de GIFs
+          >
+            <Text style={styles.gifButtonText}>GIF</Text>
+          </TouchableOpacity>
         </View>
+
+        {/* GIF Modal */}
+        {gifModalVisible && (
+          <Modal
+            visible={gifModalVisible}
+            animationType="slide"
+            onRequestClose={() => setGifModalVisible(false)}
+          >
+            <View style={styles.gifModalContainer}>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Buscar GIFs..."
+                value={searchTerm}
+                onChangeText={setSearchTerm}
+              />
+              <TouchableOpacity style={styles.searchButton} onPress={fetchGifs}>
+                <Text style={styles.searchButtonText}>Buscar</Text>
+              </TouchableOpacity>
+              <FlatList
+                data={searchResults}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity onPress={() => handleGifPublish(item)}>
+                    <Image source={{ uri: item }} style={styles.gif} />
+                  </TouchableOpacity>
+                )}
+                style={styles.gifList}
+              />
+              <TouchableOpacity
+                style={styles.closeGifButton}
+                onPress={() => setGifModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>Cerrar</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
+        )}
       </View>
     </Modal>
   );
@@ -131,6 +257,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
   },
+  suggestionsContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  suggestionsTitle: {
+    fontWeight: "bold",
+    marginBottom: 8,
+    fontSize: 16,
+  },
+  suggestionsList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  suggestionButton: {
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  suggestionText: {
+    color: "#000",
+  },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -156,5 +306,55 @@ const styles = StyleSheet.create({
   publishButtonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  gif: {
+    width: 150, // Ajusta el tamaño según tu diseño
+    height: 150,
+    marginVertical: 8,
+    borderRadius: 8, // Si deseas bordes redondeados
+  },
+  
+  gifButton: {
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginLeft: 8,
+  },
+  gifButtonText: {
+    color: "#000",
+    fontWeight: "bold",
+  },
+  gifModalContainer: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#fff",
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    padding: 8,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  searchButton: {
+    backgroundColor: "#007bff",
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  searchButtonText: {
+    color: "#fff",
+    textAlign: "center",
+  },
+  gifList: {
+    flex: 1,
+  },
+  closeGifButton: {
+    marginTop: 16,
+    padding: 10,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    alignSelf: "center",
   },
 });
