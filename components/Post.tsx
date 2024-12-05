@@ -10,6 +10,7 @@ import {
   Modal,
   ImageBackground,
   Dimensions,
+  TextInput,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
@@ -96,9 +97,10 @@ const Post = ({ title, content, topic, author, media }: PostProps) => {
     <CommentsModal
       modalVisible={modalVisible}
       setModalVisible={setModalVisible}
+      initialComments={comments}
     />;
   };
-  
+
   const handleAddComment = () => {
     if (newComment.trim().length > 0) {
       const newCommentObject: Comment = {
@@ -247,15 +249,55 @@ const Post = ({ title, content, topic, author, media }: PostProps) => {
           <CommentsModal
             modalVisible={commentsVisible}
             setModalVisible={setCommentsVisible}
+            initialComments={comments}
           />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.postButton}>
-          <Icon name="heart" size={20} color="#000" />
+        <TouchableOpacity
+          style={styles.postButton}
+          onPress={() => {
+            console.log("Like button clicked" + "heart-" + title);
+            // cambiar estilo de icono a rojo o negro
+            const heartElement = document.getElementById(`heart-${title}`);
+            if (heartElement) {
+              heartElement.style.color =
+                heartElement.style.color === "red" ? "black" : "red";
+            }
+          }}
+        >
+          <Icon id={`heart-${title}`} name="heart" size={20} color="#000" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.postButton}>
           <Icon name="share" size={20} color="#000" />
         </TouchableOpacity>
       </View>
+
+      <View></View>
+      {/* <View style={styles.commentsSection}>
+        {comments.slice(0, 2).map((comment) => (
+          <View key={comment.id} style={styles.commentContainer}>
+            <Text style={styles.commentUser}>{comment.user}</Text>
+            <Text style={styles.commentContent}>{comment.content}</Text>
+          </View>
+        ))}
+        {comments.length > 2 && (
+          <TouchableOpacity onPress={openComments}>
+            <Text style={styles.viewAllComments}>
+              View all {comments.length} comments
+            </Text>
+          </TouchableOpacity>
+        )}
+        <View style={styles.addCommentContainer}>
+          <TextInput
+            style={styles.addCommentInput}
+            placeholder="Add a comment..."
+            value={newComment}
+            onChangeText={setNewComment}
+          />
+          <TouchableOpacity onPress={handleAddComment}>
+            <Text style={styles.postCommentButton}>Post</Text>
+          </TouchableOpacity>
+        </View>
+      </View> */}
     </ThemedView>
   );
 };
@@ -384,6 +426,45 @@ const styles = StyleSheet.create({
   pdf: {
     width: 100,
     height: 100,
+  },
+  commentsSection: {
+    marginTop: 16,
+  },
+  commentContainer: {
+    marginBottom: 12,
+  },
+  commentUser: {
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  commentContent: {
+    fontSize: 14,
+    color: "#333",
+  },
+  viewAllComments: {
+    color: "#007bff",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  addCommentContainer: {
+    flexDirection: "row",
+    marginTop: 16,
+  },
+  addCommentInput: {
+    flex: 1,
+    height: 40,
+    borderColor: "#ddd",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginRight: 8,
+  },
+  postCommentButton: {
+    backgroundColor: "#007bff",
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    color: "#fff",
   },
 });
 

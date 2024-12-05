@@ -26,7 +26,7 @@ const commentsData: Comment[] = [
   { id: "3", user: "Willyrex", content: "Información muy interesante." },
 ];
 
-const API_KEY = "";
+const API_KEY = "OiGR1ldfHucJQ3zRFCvak1SVWnIU0s3c";
 const GIPHY_API_URL = "https://api.giphy.com/v1/gifs/search";
 
 type CommentsModalProps = {
@@ -75,7 +75,6 @@ const CommentsModal = ({
     setComments([...comments, newCommentObject]); // Actualizar la lista de comentarios
     setGifModalVisible(false); // Cerrar el modal de GIFs
   };
-  
 
   const handleSuggestionClick = (suggestion: string) => {
     setNewComment(suggestion); // Pone la sugerencia en la caja de texto
@@ -119,24 +118,26 @@ const CommentsModal = ({
 
         {/* Comments List */}
         <FlatList
-  data={comments}
-  keyExtractor={(item) => item.id}
-  renderItem={({ item }) => (
-    <View style={styles.commentContainer}>
-      <Text style={styles.commentUser}>{item.user}</Text>
-      {/* Renderizar contenido del comentario si existe */}
-      {item.content && <Text style={styles.commentContent}>{item.content}</Text>}
-      {/* Renderizar GIF si existe */}
-      {item.gifUrl && (
-        <Image
-          source={{ uri: item.gifUrl }}
-          style={styles.gif} // Ajusta el tamaño y estilo del GIF
+          data={comments}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={styles.commentContainer}>
+              <Text style={styles.commentUser}>{item.user}</Text>
+              {/* Renderizar contenido del comentario si existe */}
+              {item.content && (
+                <Text style={styles.commentContent}>{item.content}</Text>
+              )}
+              {/* Renderizar GIF si existe */}
+              {item.gifUrl && (
+                <Image
+                  source={{ uri: item.gifUrl }}
+                  style={styles.gif} // Ajusta el tamaño y estilo del GIF
+                />
+              )}
+            </View>
+          )}
+          style={styles.commentsList}
         />
-      )}
-    </View>
-  )}
-  style={styles.commentsList}
-/>
         {/* Comment Suggestions */}
         <View style={styles.suggestionsContainer}>
           <Text style={styles.suggestionsTitle}>Sugerencias:</Text>
@@ -313,7 +314,7 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     borderRadius: 8, // Si deseas bordes redondeados
   },
-  
+
   gifButton: {
     backgroundColor: "#f0f0f0",
     borderRadius: 8,
