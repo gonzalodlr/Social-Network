@@ -17,7 +17,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import Video from "react-native-video";
-import CommentsModal from "./Comment";
+import CommentsModal, { commentsData } from "./Comment";
 
 const verifiedIcon = require("@/assets/images/verificado.png");
 const pdfIcon = require("@/assets/images/pdfIcon.png");
@@ -71,6 +71,10 @@ const Post = ({ title, content, topic, author, media }: PostProps) => {
   const [newComment, setNewComment] = useState<string>("");
   const authorColor = getRandomColor();
 
+  const openComments = () => {
+    setCommentsVisible(true);
+  };
+
   const handleAuthorPress = () => {
     console.log(`Author ${author} clicked`);
   };
@@ -91,15 +95,6 @@ const Post = ({ title, content, topic, author, media }: PostProps) => {
     setModalVisible(false);
   };
 
-  const openComments = () => {
-    setCommentsVisible(true);
-    console.log("Comments button clicked");
-    <CommentsModal
-      modalVisible={modalVisible}
-      setModalVisible={setModalVisible}
-      initialComments={comments}
-    />;
-  };
 
   const handleAddComment = () => {
     if (newComment.trim().length > 0) {
@@ -272,6 +267,23 @@ const Post = ({ title, content, topic, author, media }: PostProps) => {
       </View>
 
       <View></View>
+      <View style={styles.commentsSection}>
+        <View style={styles.commentsDivider} />
+        {commentsData.slice(0, 2).map((comment) => (
+          <View key={comment.id} style={styles.commentContainer}>
+        <Text style={styles.commentUser}>{comment.user}</Text>
+        <Text style={styles.commentContent}>{comment.content}</Text>
+          </View>
+        ))}
+        {commentsData.length > 2 && (
+          <TouchableOpacity onPress={openComments}>
+        <Text style={styles.viewAllComments}>
+          Ver todos los comentarios
+        </Text>
+          </TouchableOpacity>
+        )}
+        
+      </View>
       {/* <View style={styles.commentsSection}>
         {comments.slice(0, 2).map((comment) => (
           <View key={comment.id} style={styles.commentContainer}>
@@ -436,6 +448,11 @@ const styles = StyleSheet.create({
   commentUser: {
     fontWeight: "bold",
     fontSize: 14,
+  },
+  commentsDivider: {
+    height: 1,
+    backgroundColor: "#ddd",
+    marginVertical: 8,
   },
   commentContent: {
     fontSize: 14,

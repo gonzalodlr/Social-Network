@@ -20,7 +20,7 @@ interface Comment {
   gifUrl?: string;
 }
 
-const commentsData: Comment[] = [
+export const commentsData: Comment[] = [
   { id: "1", user: "jU4n1t0", content: "¡Qué gran post! 🔥" },
   { id: "2", user: "SoccerFan34", content: "Completamente de acuerdo 👌" },
   { id: "3", user: "Willyrex", content: "Información muy interesante." },
@@ -86,7 +86,7 @@ const CommentsModal = ({
         params: {
           api_key: API_KEY,
           q: searchTerm,
-          limit: 10,
+          limit: 33,
         },
       });
       const gifs = response.data.data.map(
@@ -194,15 +194,19 @@ const CommentsModal = ({
                 <Text style={styles.searchButtonText}>Buscar</Text>
               </TouchableOpacity>
               <FlatList
-                data={searchResults}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => (
-                  <TouchableOpacity onPress={() => handleGifPublish(item)}>
-                    <Image source={{ uri: item }} style={styles.gif} />
-                  </TouchableOpacity>
-                )}
-                style={styles.gifList}
-              />
+  data={searchResults}
+  keyExtractor={(item, index) => index.toString()}
+  renderItem={({ item }) => (
+    <TouchableOpacity onPress={() => handleGifPublish(item)}>
+      <Image source={{ uri: item }} style={styles.gif} />
+    </TouchableOpacity>
+  )}
+  style={styles.gifGrid}
+  numColumns={11} // 11 columnas en la cuadrícula
+  columnWrapperStyle={styles.columnWrapper} // Estilo para las filas
+/>
+
+
               <TouchableOpacity
                 style={styles.closeGifButton}
                 onPress={() => setGifModalVisible(false)}
@@ -309,10 +313,19 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   gif: {
-    width: 150, // Ajusta el tamaño según tu diseño
-    height: 150,
-    marginVertical: 8,
-    borderRadius: 8, // Si deseas bordes redondeados
+    width: 130,
+    height: 130,
+    margin: 2, 
+    borderRadius: 4, 
+  },
+  gifGrid: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  
+  columnWrapper: {
+    justifyContent: "space-between", 
+    marginVertical: 5, 
   },
 
   gifButton: {
@@ -349,7 +362,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   gifList: {
-    flex: 1,
+    flexGrow: 0,
+    paddingVertical: 10,
   },
   closeGifButton: {
     marginTop: 16,
