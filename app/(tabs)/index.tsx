@@ -37,7 +37,11 @@ export default function App() {
               <Stack.Screen name="StartScreen" component={StartScreen} />
               <Stack.Screen name="LoginScreen" component={LoginScreen} />
               <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
-              <Stack.Screen name="HomeScreen" component={Main} />
+              <Stack.Screen
+                name={"HomeScreen"}
+                component={Main}
+                initialParams={{ nombre: "invitado" }}
+              />
               <Stack.Screen
                 name="ResetPasswordScreen"
                 component={ResetPasswordScreen}

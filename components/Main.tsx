@@ -1,6 +1,6 @@
 /** @format */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   StyleSheet,
   FlatList,
@@ -14,15 +14,14 @@ import {
 import Post from "@/components/Post";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 import { Video } from "react-native-video";
-
 import warzone from "@/assets/images/warzone.jpg";
 import futbol from "@/assets/images/futbol.jpg";
 import nttdata from "@/assets/images/nttdata.jpg";
 import triatlon from "@/assets/images/triatlon.jpg";
 const pdfIcon = require("@/assets/images/pdfIcon.png");
+import { getCurrentUser } from "../helpers/currentUser";
 
 interface Post {
   id: string;
@@ -88,6 +87,17 @@ const posts = [
 ];
 
 export default function Main() {
+  const [nombre, setNombre] = useState("");
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const currentUser = await getCurrentUser();
+      setNombre(currentUser);
+    };
+
+    fetchCurrentUser();
+  }, []);
+
   const [selectedTopic, setSelectedTopic] = useState("Todos");
 
   const topics = [
@@ -124,7 +134,7 @@ export default function Main() {
       id: (posts.length + 1).toString(),
       title: newPost.title,
       topic: newPost.topic,
-      author: newPost.author,
+      author: nombre,
       content: newPost.content,
       media: {
         uri: newPost.media.uri,
@@ -262,8 +272,9 @@ export default function Main() {
           />
           <TextInput
             style={styles.input}
-            placeholder="Autor"
             onChangeText={(text) => handleInputChange("author", text)}
+            value={nombre}
+            editable={false}
           />
           <TextInput
             style={styles.input}

@@ -1,5 +1,7 @@
+/** @format */
+
 import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Platform } from "react-native";
 import { Text } from "react-native-paper";
 
 import Background from "../components/Background";
@@ -12,26 +14,100 @@ import { theme } from "../core/theme";
 import { emailValidator } from "../helpers/emailValidator";
 import { passwordValidator } from "../helpers/passwordValidator";
 import { nameValidator } from "../helpers/nameValidator";
+import usersData from "../bbdd/users.json";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const isWeb = Platform.OS === "web";
+
+const initializeStorage = async () => {
+  try {
+    if (isWeb) {
+      const existingData = localStorage.getItem("users");
+      if (!existingData) {
+        localStorage.setItem("users", JSON.stringify(usersData));
+        console.log("Usuarios inicializados en localStorage");
+      }
+    } else {
+      const existingData = await AsyncStorage.getItem("users");
+      if (!existingData) {
+        await AsyncStorage.setItem("users", JSON.stringify(usersData));
+        console.log("Usuarios inicializados en AsyncStorage");
+      }
+    }
+  } catch (error) {
+    console.error("Error inicializando el almacenamiento:", error);
+  }
+};
+
+const readUsersFile = async () => {
+  try {
+    if (isWeb) {
+      const data = localStorage.getItem("users");
+      return data ? JSON.parse(data) : [];
+    } else {
+      const data = await AsyncStorage.getItem("users");
+      return data ? JSON.parse(data) : [];
+    }
+  } catch (error) {
+    console.error("Error al leer los usuarios:", error);
+    return [];
+  }
+};
+
+const writeUsersFile = async (data) => {
+  try {
+    if (isWeb) {
+      localStorage.setItem("users", JSON.stringify(data));
+    } else {
+      await AsyncStorage.setItem("users", JSON.stringify(data));
+    }
+  } catch (error) {
+    console.error("Error al escribir los usuarios:", error);
+  }
+};
 
 export default function RegisterScreen({ navigation }) {
+  initializeStorage();
   const [name, setName] = useState({ value: "", error: "" });
   const [email, setEmail] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
 
-  const onSignUpPressed = () => {
+  // Registra un nuevo usuario
+  const onSignUpPressed = async () => {
     const nameError = nameValidator(name.value);
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
+
     if (emailError || passwordError || nameError) {
       setName({ ...name, error: nameError });
       setEmail({ ...email, error: emailError });
       setPassword({ ...password, error: passwordError });
       return;
     }
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "HomeScreen" }],
-    });
+
+    const newUser = {
+      name: name.value,
+      email: email.value,
+      password: password.value,
+    };
+
+    try {
+      const users = await readUsersFile();
+      users.push(newUser);
+      await writeUsersFile(users);
+
+      // Limpiar campos
+      setName("");
+      setEmail("");
+      setPassword("");
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "HomeScreen", params: { nombre: newUser.nombre } }],
+      });
+    } catch (error) {
+      console.error("Error al registrar el usuario:", error);
+    }
   };
 
   return (

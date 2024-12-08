@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Gonzalo",
+    "email": "gonzalo@email.com",
+    "password": "gonzalo"
+  },
+  {
+    "name": "Ana",
+    "email": "ana.fernandez@uclm.es",
+    "password": "ana123"
+  },
+  {
+    "name": "JavierCuartero",
+    "email": "javier.cuartero@alu.uclm.es",
+    "password": "javier"
+  }
+]

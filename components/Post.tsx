@@ -1,6 +1,6 @@
 /** @format */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -10,7 +10,6 @@ import {
   Modal,
   ImageBackground,
   Dimensions,
-  TextInput,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
@@ -18,6 +17,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import Video from "react-native-video";
 import CommentsModal, { commentsData } from "./Comment";
+import { getCurrentUser } from "@/helpers/currentUser";
 
 const verifiedIcon = require("@/assets/images/verificado.png");
 const pdfIcon = require("@/assets/images/pdfIcon.png");
@@ -71,6 +71,17 @@ const Post = ({ title, content, topic, author, media }: PostProps) => {
   const [newComment, setNewComment] = useState<string>("");
   const authorColor = getRandomColor();
 
+  const [nombre, setNombre] = useState("");
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const currentUser = await getCurrentUser();
+      setNombre(currentUser);
+    };
+
+    fetchCurrentUser();
+  }, []);
+
   const openComments = () => {
     setCommentsVisible(true);
   };
@@ -93,19 +104,6 @@ const Post = ({ title, content, topic, author, media }: PostProps) => {
 
   const handleCloseModal = () => {
     setModalVisible(false);
-  };
-
-
-  const handleAddComment = () => {
-    if (newComment.trim().length > 0) {
-      const newCommentObject: Comment = {
-        id: (comments.length + 1).toString(),
-        user: "UsuarioActual", // Simula el usuario actual
-        content: newComment,
-      };
-      setComments([...comments, newCommentObject]);
-      setNewComment("");
-    }
   };
 
   return (
@@ -271,18 +269,17 @@ const Post = ({ title, content, topic, author, media }: PostProps) => {
         <View style={styles.commentsDivider} />
         {commentsData.slice(0, 2).map((comment) => (
           <View key={comment.id} style={styles.commentContainer}>
-        <Text style={styles.commentUser}>{comment.user}</Text>
-        <Text style={styles.commentContent}>{comment.content}</Text>
+            <Text style={styles.commentUser}>{comment.user}</Text>
+            <Text style={styles.commentContent}>{comment.content}</Text>
           </View>
         ))}
         {commentsData.length > 2 && (
           <TouchableOpacity onPress={openComments}>
-        <Text style={styles.viewAllComments}>
-          Ver todos los comentarios
-        </Text>
+            <Text style={styles.viewAllComments}>
+              Ver todos los comentarios
+            </Text>
           </TouchableOpacity>
         )}
-        
       </View>
       {/* <View style={styles.commentsSection}>
         {comments.slice(0, 2).map((comment) => (

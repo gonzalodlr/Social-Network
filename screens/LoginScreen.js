@@ -1,5 +1,7 @@
+/** @format */
+
 import React, { useState } from "react";
-import { TouchableOpacity, StyleSheet, View } from "react-native";
+import { TouchableOpacity, StyleSheet, View, Platform } from "react-native";
 import { Text } from "react-native-paper";
 
 import Background from "../components/Background";
@@ -11,6 +13,10 @@ import BackButton from "../components/BackButton";
 import { theme } from "../core/theme";
 import { emailValidator } from "../helpers/emailValidator";
 import { passwordValidator } from "../helpers/passwordValidator";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const isWeb = Platform.OS === "web";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState({ value: "", error: "" });
@@ -24,10 +30,35 @@ export default function LoginScreen({ navigation }) {
       setPassword({ ...password, error: passwordError });
       return;
     }
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "HomeScreen" }],
-    });
+
+    let user;
+    if (isWeb) {
+      const users = JSON.parse(localStorage.getItem("users")) || [];
+      user = users.find(
+        (user) => user.email === email.value && user.password === password.value
+      );
+    } else {
+      AsyncStorage.getItem("users").then((data) => {
+        const users = data ? JSON.parse(data) : [];
+        user = users.find(
+          (user) =>
+            user.email === email.value && user.password === password.value
+        );
+      });
+    }
+
+    if (!user) {
+      setEmail({ ...email, error: "Invalid email or password" });
+      setPassword({ ...password, error: "Invalid email or password" });
+      return;
+    }
+    // navega a la pantalla HomeScreen con el nombre del usuario
+    navigation.navigate("HomeScreen");
+    if (isWeb) {
+      localStorage.setItem("currentUser", JSON.stringify(user));
+    } else {
+      AsyncStorage.setItem("currentUser", JSON.stringify(user));
+    }
   };
 
   return (

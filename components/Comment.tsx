@@ -1,6 +1,6 @@
 /** @format */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   Image,
 } from "react-native";
 import axios from "axios";
+import { getCurrentUser } from "@/helpers/currentUser";
 
 interface Comment {
   id: string;
@@ -53,12 +54,22 @@ const CommentsModal = ({
   const [gifModalVisible, setGifModalVisible] = useState(false);
   const [searchResults, setSearchResults] = useState<string[]>([]); // URLs de los GIFs encontrados
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [nombre, setNombre] = useState("");
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const currentUser = await getCurrentUser();
+      setNombre(currentUser);
+    };
+
+    fetchCurrentUser();
+  }, []);
 
   const handleAddComment = (content: string) => {
     if (newComment.trim().length > 0) {
       const newCommentObject: Comment = {
         id: (comments.length + 1).toString(),
-        user: "UsuarioActual", // Simula el nombre del usuario actual
+        user: nombre,
         content: newComment,
       };
       setComments([...comments, newCommentObject]);
@@ -194,18 +205,17 @@ const CommentsModal = ({
                 <Text style={styles.searchButtonText}>Buscar</Text>
               </TouchableOpacity>
               <FlatList
-  data={searchResults}
-  keyExtractor={(item, index) => index.toString()}
-  renderItem={({ item }) => (
-    <TouchableOpacity onPress={() => handleGifPublish(item)}>
-      <Image source={{ uri: item }} style={styles.gif} />
-    </TouchableOpacity>
-  )}
-  style={styles.gifGrid}
-  numColumns={11} // 11 columnas en la cuadrícula
-  columnWrapperStyle={styles.columnWrapper} // Estilo para las filas
-/>
-
+                data={searchResults}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity onPress={() => handleGifPublish(item)}>
+                    <Image source={{ uri: item }} style={styles.gif} />
+                  </TouchableOpacity>
+                )}
+                style={styles.gifGrid}
+                numColumns={11} // 11 columnas en la cuadrícula
+                columnWrapperStyle={styles.columnWrapper} // Estilo para las filas
+              />
 
               <TouchableOpacity
                 style={styles.closeGifButton}
@@ -315,17 +325,17 @@ const styles = StyleSheet.create({
   gif: {
     width: 130,
     height: 130,
-    margin: 2, 
-    borderRadius: 4, 
+    margin: 2,
+    borderRadius: 4,
   },
   gifGrid: {
     flex: 1,
     marginHorizontal: 5,
   },
-  
+
   columnWrapper: {
-    justifyContent: "space-between", 
-    marginVertical: 5, 
+    justifyContent: "space-between",
+    marginVertical: 5,
   },
 
   gifButton: {
