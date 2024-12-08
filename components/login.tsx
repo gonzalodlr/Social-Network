@@ -12,7 +12,7 @@ import {
 } from "react-native";
 
 import { NavigationProp } from "@react-navigation/native";
-import { router } from "expo-router";
+import { router, RelativePathString } from "expo-router";
 const logo = require("@/assets/images/logo.png");
 
 const LoginScreen = ({ navigation }: { navigation: NavigationProp<any> }) => {
@@ -44,7 +44,7 @@ const LoginScreen = ({ navigation }: { navigation: NavigationProp<any> }) => {
       <Button title="Iniciar Sesión" onPress={Login} />
       <TouchableOpacity
         onPress={() => {
-          router.push("/singup");
+          router.push("/signup" as RelativePathString);
         }}
       >
         <Text style={styles.registerText}>

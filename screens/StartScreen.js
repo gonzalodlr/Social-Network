@@ -9,6 +9,26 @@ import Button from "../components/Button";
 import Paragraph from "../components/Paragraph";
 import { StatusBar } from "react-native";
 
+const initializeStorage = async () => {
+  try {
+    if (isWeb) {
+      const existingData = localStorage.getItem("users");
+      if (!existingData) {
+        localStorage.setItem("users", JSON.stringify(usersData));
+        console.log("Usuarios inicializados en localStorage");
+      }
+    } else {
+      const existingData = await AsyncStorage.getItem("users");
+      if (!existingData) {
+        await AsyncStorage.setItem("users", JSON.stringify(usersData));
+        console.log("Usuarios inicializados en AsyncStorage");
+      }
+    }
+  } catch (error) {
+    console.error("Error inicializando el almacenamiento:", error);
+  }
+};
+
 export default function StartScreen({ navigation }) {
   return (
     <Background>

@@ -13,12 +13,49 @@ import BackButton from "../components/BackButton";
 import { theme } from "../core/theme";
 import { emailValidator } from "../helpers/emailValidator";
 import { passwordValidator } from "../helpers/passwordValidator";
+import usersData from "../bbdd/users.json";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const isWeb = Platform.OS === "web";
 
+const initializeStorage = async () => {
+  try {
+    if (isWeb) {
+      const existingData = localStorage.getItem("users");
+      if (!existingData) {
+        localStorage.setItem("users", JSON.stringify(usersData));
+        console.log("Usuarios inicializados en localStorage");
+      }
+    } else {
+      const existingData = await AsyncStorage.getItem("users");
+      if (!existingData) {
+        await AsyncStorage.setItem("users", JSON.stringify(usersData));
+        console.log("Usuarios inicializados en AsyncStorage");
+      }
+    }
+  } catch (error) {
+    console.error("Error inicializando el almacenamiento:", error);
+  }
+};
+
+const readUsersFile = async () => {
+  try {
+    if (isWeb) {
+      const data = localStorage.getItem("users");
+      return data ? JSON.parse(data) : [];
+    } else {
+      const data = await AsyncStorage.getItem("users");
+      return data ? JSON.parse(data) : [];
+    }
+  } catch (error) {
+    console.error("Error al leer los usuarios:", error);
+    return [];
+  }
+};
+
 export default function LoginScreen({ navigation }) {
+  initializeStorage();
   const [email, setEmail] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
 
