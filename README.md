@@ -4,7 +4,7 @@ Posttopia is a social network app created for the Multimedia course at the Unive
 
 ## Features
 
-- **Post creation:** Share photos, videos, or even documents (PDFs, DOCX, etc.) with optional descriptions.
+- **Post creation:** Share and download photos, videos, or even documents (PDFs, DOCX, etc.) with optional descriptions.
 - **Interactive feed:** Browse a dynamic feed filtered by categories (sports, gaming, fashion, etc.).
 - **User interaction:** Like posts, comment with text, emojis, or GIFs (powered by the Giphy API).
 - **Search functionality:** Find other users and their posts easily.
