@@ -20,7 +20,9 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/logo.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.postopia.app"
+
     },
     "web": {
       "bundler": "metro",
